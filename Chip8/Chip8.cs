@@ -4,13 +4,15 @@ using System.Text;
 
 namespace Chip8
 {
-    public class Cpu
+    public class Chip8
     {
         public bool Redraw { get; set; }
 
         public bool[] Gfx { get; private set; }
 
-        public Cpu()
+        public bool[] key { get; private set; }
+
+        public Chip8()
         {
         }
 
