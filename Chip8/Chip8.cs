@@ -11,7 +11,7 @@ namespace Chip8
 
         public bool Redraw { get; set; }
 
-        public bool[] Gfx { get; private set; }
+        public bool[] Screen { get; private set; } = new bool[ScreenWidth * ScreenHeight];
 
         public bool[] Keys { get; private set; }
 
@@ -25,11 +25,6 @@ namespace Chip8
 
         public void Tick()
         {
-        }
-
-        private void Reset()
-        {
-            Gfx = new bool[64 * 32];
         }
     }
 }
