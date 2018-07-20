@@ -1,6 +1,6 @@
 ﻿using OpenTK;
 using OpenTK.Graphics;
-using OpenTK.Graphics.ES20;
+using OpenTK.Graphics.OpenGL;
 using System;
 
 namespace Chip8
@@ -23,34 +23,55 @@ namespace Chip8
         {
             Console.WriteLine("Open GL version: " + GL.GetString(StringName.Version));
             Chip8 = chip8 ?? throw new ArgumentNullException(nameof(chip8));
-            Load += GameWindow_Load;
-            UpdateFrame += GameWindow_UpdateFrame;
             RenderFrame += GameWindow_RenderFrame;
         }
 
         public Chip8 Chip8 { get; }
 
-        private void GameWindow_Load(object sender, EventArgs e)
+        private void GameWindow_RenderFrame(object sender, FrameEventArgs e)
         {
-            // Create texture
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GL.ClearColor(Color.CornflowerBlue);
+
+            //Matrix4 modelview = Matrix4.LookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY);
+            //GL.MatrixMode(MatrixMode.Modelview);
+            //GL.LoadMatrix(ref modelview);
+
+            GL.Begin(PrimitiveType.Quads);
+            UpdateQuads();
+            GL.End();
+            SwapBuffers();
         }
 
-        private void GameWindow_UpdateFrame(object sender, FrameEventArgs e)
+        private void UpdateQuads()
         {
-            Chip8.Tick();
-
-            if (Chip8.Redraw)
+            for (int y = 0; y < Chip8.ScreenHeight; ++y)
             {
-                // Update texture       
-                Chip8.Redraw = false;
+                for (int x = 0; x < Chip8.ScreenWidth; ++x)
+                {
+                    if (Chip8.Screen[(y * 64) + x])
+                    {
+                        GL.Color3(0f, 0.0f, 0.0f);
+                    }
+                    else
+                    {
+                        GL.Color3(1.0f, 1.0f, 1.0f);
+                    }
+
+                    DrawPixel(x, y);
+                }
             }
         }
 
-        private void GameWindow_RenderFrame(object sender, FrameEventArgs e)
+        private void DrawPixel(int x, int y)
         {
-            GL.ClearColor(Color4.Purple);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            SwapBuffers();
+            float vx = (x * Scale);
+            float vy = (y * Scale);
+           
+            GL.Vertex3(vx, vy, 0);
+            GL.Vertex3(vx, vy + Scale, 0);
+            GL.Vertex3(vx + Scale, vy + Scale, 0);
+            GL.Vertex3(vx + Scale, vy, 0);           
         }
     }
 }
