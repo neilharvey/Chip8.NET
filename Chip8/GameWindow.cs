@@ -23,55 +23,61 @@ namespace Chip8
         {
             Console.WriteLine("Open GL version: " + GL.GetString(StringName.Version));
             Chip8 = chip8 ?? throw new ArgumentNullException(nameof(chip8));
-            RenderFrame += GameWindow_RenderFrame;
         }
 
         public Chip8 Chip8 { get; }
 
-        private void GameWindow_RenderFrame(object sender, FrameEventArgs e)
+        protected override void OnLoad(EventArgs e)
         {
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GL.ClearColor(Color.CornflowerBlue);
+            base.OnLoad(e);
 
-            //Matrix4 modelview = Matrix4.LookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY);
-            //GL.MatrixMode(MatrixMode.Modelview);
-            //GL.LoadMatrix(ref modelview);
-
-            GL.Begin(PrimitiveType.Quads);
-            UpdateQuads();
-            GL.End();
-            SwapBuffers();
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
+            GL.Ortho(0, Width, Height, 0, -1, 1);
+            GL.Viewport(0, 0, Width, Height);
         }
 
-        private void UpdateQuads()
+        protected override void OnRenderFrame(FrameEventArgs e)
         {
+            base.OnRenderFrame(e);
+
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadIdentity();
+
+            GL.Begin(PrimitiveType.Quads);
+
             for (int y = 0; y < Chip8.ScreenHeight; ++y)
             {
                 for (int x = 0; x < Chip8.ScreenWidth; ++x)
                 {
-                    if (Chip8.Screen[(y * 64) + x])
-                    {
-                        GL.Color3(0f, 0.0f, 0.0f);
-                    }
-                    else
-                    {
-                        GL.Color3(1.0f, 1.0f, 1.0f);
-                    }
-
-                    DrawPixel(x, y);
+                    DrawPixel(x, y, Chip8.Screen[(y * 64) + x]);
                 }
             }
+
+            GL.End();
+            GL.Flush();
+            SwapBuffers();
         }
 
-        private void DrawPixel(int x, int y)
+        private void DrawPixel(int x, int y, bool state)
         {
+            if (!state)
+            {
+                GL.Color3(0f, 0.0f, 0.0f);
+            }
+            else
+            {
+                GL.Color3(1.0f, 1.0f, 1.0f);
+            }
+
             float vx = (x * Scale);
             float vy = (y * Scale);
            
-            GL.Vertex3(vx, vy, 0);
-            GL.Vertex3(vx, vy + Scale, 0);
-            GL.Vertex3(vx + Scale, vy + Scale, 0);
-            GL.Vertex3(vx + Scale, vy, 0);           
+            GL.Vertex2(vx, vy);
+            GL.Vertex2(vx, vy + Scale);
+            GL.Vertex2(vx + Scale, vy + Scale);
+            GL.Vertex2(vx + Scale, vy);           
         }
     }
 }
