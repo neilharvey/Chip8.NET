@@ -51,7 +51,7 @@ namespace Chip8
             {
                 for (int x = 0; x < Chip8.ScreenWidth; ++x)
                 {
-                    DrawPixel(x, y, Chip8.Screen[(y * 64) + x]);
+                    DrawPixel(x, y, Chip8.Display[x,y]);
                 }
             }
 
