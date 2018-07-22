@@ -81,7 +81,7 @@ namespace Chip8
             switch (opcode & 0xF000)
             {
                 case 0x0000:
-                    ClearScreen();
+                    Array.Clear(Display, 0, Display.Length);
                     break;
                 case 0x1000:
                     ProgramCounter = (ushort)(opcode & 0x0FFF);
@@ -91,17 +91,6 @@ namespace Chip8
                     StackPointer++;
                     ProgramCounter = (ushort)(opcode & 0x0FFF);
                     break;
-            }
-        }
-
-        private void ClearScreen()
-        {
-            for (var x = 0; x < ScreenWidth; x++)
-            {
-                for (var y = 0; y < ScreenHeight; y++)
-                {
-                    Display[x, y] = false;
-                }
             }
         }
 
