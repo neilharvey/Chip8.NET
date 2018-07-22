@@ -28,9 +28,9 @@ namespace Chip8.Tests
             {
                 var chip8 = new Chip8();
                 chip8.Display[0, 0] = true;
-
                 chip8.Memory[0x200] = 0x00;
                 chip8.Memory[0x201] = 0xE0;
+
                 chip8.Tick();
 
                 Assert.False(chip8.Display[0, 0]);
@@ -46,9 +46,9 @@ namespace Chip8.Tests
             public void JP()
             {
                 var chip8 = new Chip8();
-
                 chip8.Memory[0x200] = 0x12;
                 chip8.Memory[0x201] = 0x34;
+
                 chip8.Tick();
 
                 Assert.Equal(0x234, chip8.ProgramCounter);
@@ -59,9 +59,9 @@ namespace Chip8.Tests
             {
                 var chip8 = new Chip8();
                 var pc = chip8.ProgramCounter;
-
                 chip8.Memory[0x200] = 0x24;
                 chip8.Memory[0x201] = 0x68;
+
                 chip8.Tick();
 
                 Assert.Equal(pc, chip8.Stack[0]);
@@ -69,9 +69,17 @@ namespace Chip8.Tests
                 Assert.Equal(0x468, chip8.ProgramCounter);
             }
 
-            [Fact(Skip = "NYI")]
+            [Fact]
             public void SE()
             {
+                var chip8 = new Chip8();
+                chip8.V[1] = 0x99;
+                chip8.Memory[0x200] = 0x31;
+                chip8.Memory[0x201] = 0x99;
+
+                chip8.Tick();
+
+                Assert.Equal(0x204, chip8.ProgramCounter);
             }
         }
     }
