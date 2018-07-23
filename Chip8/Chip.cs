@@ -6,7 +6,7 @@ using System.Text;
 namespace Chip8
 {
     // http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
-    public class Chip8
+    public class Chip
     {
         public const int ScreenWidth = 64;
         public const int ScreenHeight = 32;
@@ -31,7 +31,7 @@ namespace Chip8
             0xF0, 0x80, 0xF0, 0x80, 0x80  // F
         };
 
-        public Chip8()
+        public Chip()
         {
             Memory = new byte[4096];
             V = new byte[16];
@@ -76,20 +76,51 @@ namespace Chip8
 
         public void Tick()
         {
-            var opcode = (ushort)(Memory[ProgramCounter] << 8 | Memory[ProgramCounter + 1]);
+            //var opcode = (ushort)(Memory[ProgramCounter] << 8 | Memory[ProgramCounter + 1]);
+            var opcode = new Opcode(Memory[ProgramCounter], Memory[ProgramCounter + 1]);
 
-            switch (opcode & 0xF000)
+            switch (opcode.Value & 0xF000)
             {
                 case 0x0000:
                     Array.Clear(Display, 0, Display.Length);
                     break;
                 case 0x1000:
-                    ProgramCounter = (ushort)(opcode & 0x0FFF);
+                    ProgramCounter = opcode.Nnn;
                     break;
                 case 0x2000:
                     Stack[StackPointer] = ProgramCounter;
                     StackPointer++;
-                    ProgramCounter = (ushort)(opcode & 0x0FFF);
+                    ProgramCounter = opcode.Nnn;
+                    break;
+                case 0x3000:
+                    if (V[opcode.X] == opcode.Kk)
+                    {
+                        ProgramCounter += 4;
+                    }
+                    else
+                    {
+                        ProgramCounter += 2;
+                    }
+                    break;
+                case 0x4000:
+                    if(V[opcode.X] != opcode.Kk)
+                    {
+                        ProgramCounter += 4;
+                    }
+                    else
+                    {
+                        ProgramCounter += 2;
+                    }
+                    break;
+                case 0x5000:
+                    if(V[opcode.X] == V[opcode.Y])
+                    {
+                        ProgramCounter += 4;
+                    }
+                    else
+                    {
+                        ProgramCounter += 2;
+                    }
                     break;
             }
         }
