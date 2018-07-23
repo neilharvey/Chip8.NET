@@ -76,53 +76,82 @@ namespace Chip8
 
         public void Tick()
         {
-            //var opcode = (ushort)(Memory[ProgramCounter] << 8 | Memory[ProgramCounter + 1]);
             var opcode = new Opcode(Memory[ProgramCounter], Memory[ProgramCounter + 1]);
 
             switch (opcode.Value & 0xF000)
             {
                 case 0x0000:
-                    Array.Clear(Display, 0, Display.Length);
+                    ClearScreen();
                     break;
                 case 0x1000:
-                    ProgramCounter = opcode.Nnn;
+                    Jump(opcode);
                     break;
                 case 0x2000:
-                    Stack[StackPointer] = ProgramCounter;
-                    StackPointer++;
-                    ProgramCounter = opcode.Nnn;
+                    Call(opcode);
                     break;
                 case 0x3000:
-                    if (V[opcode.X] == opcode.Kk)
-                    {
-                        ProgramCounter += 4;
-                    }
-                    else
-                    {
-                        ProgramCounter += 2;
-                    }
+                    SkipIfEqual(opcode);
                     break;
                 case 0x4000:
-                    if(V[opcode.X] != opcode.Kk)
-                    {
-                        ProgramCounter += 4;
-                    }
-                    else
-                    {
-                        ProgramCounter += 2;
-                    }
+                    SkipIfNotEqual(opcode);
                     break;
                 case 0x5000:
-                    if(V[opcode.X] == V[opcode.Y])
-                    {
-                        ProgramCounter += 4;
-                    }
-                    else
-                    {
-                        ProgramCounter += 2;
-                    }
+                    SkipIfRegistersEqual(opcode);
                     break;
             }
+        }
+
+        private void SkipIfRegistersEqual(Opcode opcode)
+        {
+            if (V[opcode.X] == V[opcode.Y])
+            {
+                ProgramCounter += 4;
+            }
+            else
+            {
+                ProgramCounter += 2;
+            }
+        }
+
+        private void SkipIfNotEqual(Opcode opcode)
+        {
+            if (V[opcode.X] != opcode.Kk)
+            {
+                ProgramCounter += 4;
+            }
+            else
+            {
+                ProgramCounter += 2;
+            }
+        }
+
+        private void SkipIfEqual(Opcode opcode)
+        {
+            if (V[opcode.X] == opcode.Kk)
+            {
+                ProgramCounter += 4;
+            }
+            else
+            {
+                ProgramCounter += 2;
+            }
+        }
+
+        private void Call(Opcode opcode)
+        {
+            Stack[StackPointer] = ProgramCounter;
+            StackPointer++;
+            ProgramCounter = opcode.Nnn;
+        }
+
+        private void Jump(Opcode opcode)
+        {
+            ProgramCounter = opcode.Nnn;
+        }
+
+        private void ClearScreen()
+        {
+            Array.Clear(Display, 0, Display.Length);
         }
 
         private void LoadFontset()
