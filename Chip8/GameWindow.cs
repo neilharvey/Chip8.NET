@@ -10,9 +10,9 @@ namespace Chip8
         private const int Scale = 10;
         private const string WindowTitle = "Chip-8 Emulator";
 
-        public GameWindow(Chip chip8) : base(
-            Chip.ScreenWidth * Scale,
-            Chip.ScreenHeight * Scale,
+        public GameWindow(Interpreter chip8) : base(
+            Interpreter.ScreenWidth * Scale,
+            Interpreter.ScreenHeight * Scale,
             GraphicsMode.Default,
             WindowTitle,
             GameWindowFlags.FixedWindow,
@@ -25,7 +25,7 @@ namespace Chip8
             Chip8 = chip8 ?? throw new ArgumentNullException(nameof(chip8));
         }
 
-        public Chip Chip8 { get; }
+        public Interpreter Chip8 { get; }
 
         protected override void OnLoad(EventArgs e)
         {
@@ -47,9 +47,9 @@ namespace Chip8
 
             GL.Begin(PrimitiveType.Quads);
 
-            for (int y = 0; y < Chip.ScreenHeight; ++y)
+            for (int y = 0; y < Interpreter.ScreenHeight; ++y)
             {
-                for (int x = 0; x < Chip.ScreenWidth; ++x)
+                for (int x = 0; x < Interpreter.ScreenWidth; ++x)
                 {
                     DrawPixel(x, y, Chip8.Display[x,y]);
                 }

@@ -10,7 +10,7 @@ namespace Chip8
 {
     class Program
     {
-        static Chip chip8;
+        static Interpreter chip8;
 
         static void Main(string[] args)
         {
@@ -20,7 +20,7 @@ namespace Chip8
             //    return;
             //}
 
-            chip8 = new Chip();
+            chip8 = new Interpreter();
             //chip8.LoadApplication(args[0]);
 
             using (var window = new GameWindow(chip8))
