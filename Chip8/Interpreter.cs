@@ -50,11 +50,11 @@ namespace Chip8
 
         public byte[] V { get; private set; }
 
-        public ushort I { get; private set; }
+        public ushort I { get; set; }
 
-        public byte Delay { get; private set; }
+        public byte Delay { get; set; }
 
-        public byte Sound { get; private set; }
+        public byte Sound { get; set; }
 
         public ushort ProgramCounter { get; private set; }
 
@@ -81,7 +81,15 @@ namespace Chip8
             switch (opcode.Value & 0xF000)
             {
                 case 0x0000:
-                    ClearScreen();
+                    switch(opcode.Kk)
+                    {
+                        case 0xE0:
+                            ClearScreen();
+                            break;
+                        case 0xEE:
+                            Return();
+                            break;
+                    }
                     break;
                 case 0x1000:
                     Jump(opcode);
@@ -120,19 +128,19 @@ namespace Chip8
                             BitwiseXor(opcode);
                             break;
                         case 0x4:
-                            AddRegister(opcode);
+                            AddRegisters(opcode);
                             break;
                         case 0x5:
-                            SubtractRegister(opcode);
+                            SubtractRegisters(opcode);
                             break;
                         case 0x6:
-                            Shr(opcode);
+                            ShiftRight(opcode);
                             break;
                         case 0x7:
-                            Subn(opcode);
+                            SubtractRegistersInverse(opcode);
                             break;
                         case 0xE:
-                            Shl(opcode);
+                            ShiftLeft(opcode);
                             break;
                     }
                     break;
@@ -171,7 +179,7 @@ namespace Chip8
                         case 0x0A:
                             LoadRegisterFromKeyDown(opcode);
                             break;
-                        case 0x12:
+                        case 0x15:
                             LoadDelayFromRegister(opcode);
                             break;
                         case 0x18:
@@ -195,8 +203,6 @@ namespace Chip8
                     }
 
                     break;
-
-
             }
         }
 
@@ -222,7 +228,7 @@ namespace Chip8
 
         private void AddRegisterToAddress(Opcode opcode)
         {
-            throw new NotImplementedException();
+            I = (ushort)(I + V[opcode.X]);
         }
 
         private void LoadSoundFromRegister(Opcode opcode)
@@ -232,7 +238,7 @@ namespace Chip8
 
         private void LoadDelayFromRegister(Opcode opcode)
         {
-            throw new NotImplementedException();
+            Delay = V[opcode.X];
         }
 
         private void LoadRegisterFromKeyDown(Opcode opcode)
@@ -242,7 +248,7 @@ namespace Chip8
 
         private void LoadRegisterFromDelay(Opcode opcode)
         {
-            throw new NotImplementedException();
+            V[opcode.X] = Delay;
         }
 
         private void SkipIfKeyUp(Opcode opcode)
@@ -267,12 +273,12 @@ namespace Chip8
 
         private void JumpOffset(Opcode opcode)
         {
-            throw new NotImplementedException();
+            ProgramCounter = (ushort)(opcode.Nnn + V[0]);
         }
 
         private void LoadAddressFromData(Opcode opcode)
         {
-            throw new NotImplementedException();
+            I = opcode.Nnn;
         }
 
         private void SkipIfRegistersNotEqual(Opcode opcode)
@@ -280,49 +286,60 @@ namespace Chip8
             throw new NotImplementedException();
         }
 
-        private void Shl(Opcode opcode)
+        private void ShiftLeft(Opcode opcode)
         {
             throw new NotImplementedException();
         }
 
-        private void Subn(Opcode opcode)
+        private void SubtractRegistersInverse(Opcode opcode)
         {
             throw new NotImplementedException();
         }
 
-        private void Shr(Opcode opcode)
+        private void ShiftRight(Opcode opcode)
         {
             throw new NotImplementedException();
         }
 
-        private void SubtractRegister(Opcode opcode)
+        private void SubtractRegisters(Opcode opcode)
         {
             throw new NotImplementedException();
         }
 
-        private void AddRegister(Opcode opcode)
+        private void AddRegisters(Opcode opcode)
         {
-            throw new NotImplementedException();
+            var sum = V[opcode.X] + V[opcode.Y];
+
+            if(sum > 255)
+            {
+                V[0xF] = 0x01;
+            } 
+            else
+            {
+                V[0xF] = 0x00;
+            }
+
+            V[opcode.X] = (byte)(sum % 256);
         }
 
         private void BitwiseXor(Opcode opcode)
         {
-            throw new NotImplementedException();
+            V[opcode.X] = (byte)(V[opcode.X] ^ V[opcode.Y]);
         }
 
         private void BitwiseAnd(Opcode opcode)
         {
-            throw new NotImplementedException();
+            V[opcode.X] = (byte)(V[opcode.X] & V[opcode.Y]);
         }
 
         private void BitwiseOr(Opcode opcode)
         {
-            throw new NotImplementedException();
+            V[opcode.X] = (byte)(V[opcode.X] | V[opcode.Y]);
         }
 
         private void LoadRegisterFromRegister(Opcode opcode)
         {
-            throw new NotImplementedException();
+            V[opcode.X] = V[opcode.Y];
         }
 
         private void AddDataToRegister(Opcode opcode)
@@ -382,6 +399,13 @@ namespace Chip8
         private void Jump(Opcode opcode)
         {
             ProgramCounter = opcode.Nnn;
+        }
+
+        private void Return()
+        {
+            StackPointer--;
+            ProgramCounter = Stack[StackPointer];
+            ProgramCounter += 2;
         }
 
         private void ClearScreen()
